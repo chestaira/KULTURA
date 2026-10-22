@@ -12,7 +12,7 @@ async function start() {
 $('#login').onsubmit = async e => {
   e.preventDefault();
   const {error} = await db.auth.signInWithPassword({email: $('#em').value, password: $('#pw').value});
-  if (error) $('#lerr').textContent = 'Email atau kata sandi salah.'; else list();
+  if (error) $('#lerr').textContent = 'Gagal masuk: ' + error.message; else list();
 };
 $('#out').onclick = async () => { await db.auth.signOut(); show('login'); };
 
