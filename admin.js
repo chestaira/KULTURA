@@ -3,7 +3,7 @@ const db = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_KEY);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let editId = null, cover = '';
 $('#f-cat').innerHTML = C.KATEGORI.map(k => `<option>${esc(k)}</option>`).join('');
-const show = id => ['login', 'dash', 'ed'].forEach(x => $('#' + x).hidden = x !== id);
+const show = id => ['login', 'dash', 'ed', 'stats'].forEach(x => $('#' + x).hidden = x !== id);
 
 async function start() {
   const {data} = await db.auth.getSession();
@@ -109,4 +109,34 @@ $('#ed').onsubmit = async e => {
   const {error} = await q;
   if (error) $('#serr').textContent = 'Gagal menyimpan: ' + error.message; else list();
 };
+// Statistik
+$('#st').onclick = () => stats();
+$('#back').onclick = list;
+$('#range').onchange = () => stats();
+async function stats() {
+  show('stats'); $('#sbody').innerHTML = '<p class="msg">Memuat…</p>';
+  const days = +$('#range').value, {data: d, error} = await db.rpc('get_stats', {p_days: days});
+  if (error) return $('#sbody').innerHTML = `<p class="err">Gagal memuat statistik: ${esc(error.message)}. Pastikan analytics-setup.sql sudah dijalankan.</p>`;
+  const pct = (a, b) => b ? Math.round(a / b * 100) : 0, n = x => Number(x).toLocaleString('id-ID');
+  const byDay = Object.fromEntries(d.daily.map(x => [x.day, x.views])), bars = [];
+  for (let i = days - 1; i >= 0; i--) { const k = new Date(Date.now() - i * 864e5).toLocaleDateString('sv-SE', {timeZone: 'Asia/Jakarta'}); bars.push([k, byDay[k] || 0]); }
+  const mx = Math.max(1, ...bars.map(b => b[1]));
+  if (!d.total) return $('#sbody').innerHTML = '<p class="msg">Belum ada kunjungan pada periode ini. Kunjungan admin tidak dihitung, jadi coba buka artikel dari HP atau browser lain tanpa login.</p>';
+  $('#sbody').innerHTML = `
+    <div class="tiles">
+      <div class="tile"><b>${n(d.total)}</b><span>Tampilan</span></div>
+      <div class="tile"><b>${n(d.unique)}</b><span>Pembaca unik</span></div>
+      <div class="tile"><b>${pct(d.finished, d.total)}%</b><span>Membaca sampai selesai</span></div>
+    </div>
+    <h2 class="sec">Tampilan per hari</h2>
+    <div class="chart" role="img" aria-label="Grafik tampilan per hari">${bars.map(([k, v]) => `<i style="height:${Math.max(2, v / mx * 100)}%" title="${k}: ${v} tampilan"></i>`).join('')}</div>
+    <h2 class="sec">Per artikel</h2>
+    <div class="tw"><table><thead><tr><th>Judul</th><th>Tampilan</th><th>Pembaca</th><th>Rata-rata dibaca</th><th>Selesai</th></tr></thead><tbody>
+    ${d.articles.map(a => `<tr><td>${esc(a.title)}</td><td>${n(a.views)}</td><td>${n(a.visitors)}</td><td>${a.avg_scroll}%</td><td>${n(a.finished)} (${pct(a.finished, a.views)}%)</td></tr>`).join('')}
+    </tbody></table></div>
+    <h2 class="sec">Asal pengunjung</h2>
+    <ul class="mine">${d.sources.map(s => `<li><span>${esc(s.source)}</span><span>${n(s.views)} (${pct(s.views, d.total)}%)</span></li>`).join('')}</ul>
+    <p class="hint">Selesai = pembaca menggulir sampai ±80% artikel dan bertahan minimal 10 detik. Pembaca unik dihitung per browser, jadi angkanya perkiraan.</p>`;
+}
+
 start();

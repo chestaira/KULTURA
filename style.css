@@ -68,3 +68,19 @@ input:not([type=checkbox]):not([type=file]),select,textarea{display:block;width:
 .hint{font-size:.9rem;color:var(--muted);margin:.5rem 0 1rem}.err{color:#b3261e;margin:.5rem 0 0}
 .chk{display:flex;align-items:center;gap:.5rem}
 @media(max-width:600px){.two{grid-template-columns:1fr}}
+
+/* statistik */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.tile{background:#fff;border:1px solid var(--line);border-radius:.5rem;padding:1rem 1.25rem}
+.tile b{display:block;font-family:var(--head);font-weight:400;font-size:2.2rem;line-height:1.1;color:var(--leaf)}
+.tile span{color:var(--muted);font-size:.95rem}
+.chart{display:flex;align-items:flex-end;gap:2px;height:8rem;background:#fff;border:1px solid var(--line);border-radius:.5rem;padding:.75rem}
+.chart i{flex:1;background:var(--leaf);border-radius:2px 2px 0 0;min-width:2px}
+.chart i:hover{background:var(--gold)}
+.tw{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:.5rem}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{text-align:left;padding:.65rem .9rem;border-bottom:1px solid var(--line);white-space:nowrap}
+td:first-child{white-space:normal;min-width:12rem}
+th{font-weight:700;background:var(--bg)}
+.adm .sec{margin-top:2rem}
+@media(max-width:600px){.tiles{grid-template-columns:1fr}}
