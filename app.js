@@ -33,7 +33,7 @@ async function track(slug, el) {
     const t0 = Date.now(); let sent = 0;
     const tick = () => {
       const b = el.getBoundingClientRect(), p = Math.min(100, Math.max(0, (innerHeight - b.top) / b.height * 100));
-      for (const m of [25, 50, 80, 100]) if (p >= m && m > sent && (m < 80 || Date.now() - t0 >= 10000)) { sent = m; db.rpc('track_read', {p_id: id, p_visitor: vid, p_scroll: m}); }
+      for (const m of [25, 50, 80, 100]) if (p >= m && m > sent && (m < 80 || Date.now() - t0 >= 10000)) { sent = m; db.rpc('track_read', {p_id: id, p_visitor: vid, p_scroll: m}).then(() => {}); }
       if (sent === 100) clearInterval(iv);
     };
     const iv = setInterval(tick, 3000); addEventListener('scroll', tick, {passive: true});
